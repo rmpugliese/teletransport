@@ -5,4 +5,5 @@ Teletransport is a platform to control fleet of heterogeneous mobile robots. The
 Teletransport can provide generally limited access to robots built by third party provided that there is a plug-in developed and available and full access to robots with a ROS control system developed by VisionQub.IT. We call the former type of robots “Hosted Robots” and the latter “Native Robots”.
 In case of “Native Robots” Teletransport can run on the same robot hardware, on the customer premises and on the cloud. Communication is available between the local teletransport and the remote one. The purpose of the local installation is the remote control of the single robot. The purpose of the remote version running on the customer premises or on the cloud is the remote control of fleet of robots.
 
+Teletransport is a scalable, responsive web application based on NodeJS, MongoDB, Express and VueJS.
 For more information please read the document Teletransport.pdf that is a sort of manual of the application.
