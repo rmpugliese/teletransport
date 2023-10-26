@@ -13,17 +13,8 @@ const git = require('git-last-commit');
 require("dotenv").config();
 
 const transporter = nodemailer.createTransport({
- // port: 465,               // true for 465, false for other ports
- // port: 25,
  port: process.env.MAIL_PORT,
- // host: "smtp.gmail.com",
- // host: 'teletransport.visionqub.it',
  host: process.env.MAIL_HOST,
- // auth: {
- //    user: 'rmpugliese@gmail.com',
- //    pass: 'Ro-19-by-64',
- // },
- // secure: true,
 });
 
 function TTsendMail(mailfrom, mailto, mailsubject, mailtext) {
