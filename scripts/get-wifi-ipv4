@@ -1,0 +1,3 @@
+#!/bin/bash
+
+ip addr show $(/util/scripts/list-wifi-devices)|grep inet |grep -v inet6 |awk '{print $2}'

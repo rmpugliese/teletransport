@@ -1,0 +1,6 @@
+#!/bin/bash
+# this restores or loads the parameter map ready for robot
+/bin/cp /opt/teletransport-main/public/maps/$1.jpg /util/ros/jobot/map/map.jpg
+/bin/cp /opt/teletransport-main/public/maps/$1.yml /util/ros/jobot/map/map.yml
+/bin/cp /opt/teletransport-main/public/maps/$1.json /util/ros/jobot/map/map.json
+/bin/cp /opt/teletransport-main/public/maps/$1.pbstream /util/ros/jobot/map/map.pbstream

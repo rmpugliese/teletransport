@@ -1,0 +1,71 @@
+<% layout('layouts/boilerplate')%>
+
+<div id="app" class="container-fluid">
+   <div class="row">
+        <%- include('./jobotSidebar')%>
+        <main role="main" class="col-md-9 ml-sm-auto col-lg-10 px-4">
+          <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+            <h1 class="h2">Chabot Q&A @(<%= robot.title %>) </h1>
+            <b>
+              <p class="text-danger" v-if="!connected">Not connected!</p>
+    				  <p class="text-success" v-if="connected">Connected!</p>
+              <p class="text-success">{{ rosbridge_address }}</p>
+            </b>
+            <input type="hidden" id="current_user_id" name= "current_user_id" value="<%= currentUser._id %>" />
+            <input type="hidden" id="connecturl" name="connecturl" value="<%= robot.connecturl %>" />
+            <input type="hidden" id="robot_id" name="robot_id" value="<%= robot.id %>" />
+            <button :disabled="loading" class="btn btn-danger" @click="disconnect" v-if="connected">Disconnect!</button>
+    				<button :disabled="loading" class="btn btn-success" @click="connect" v-else>Connect!</button>
+            <button :disabled="loading" class="btn btn-success" @click="remote"><span data-feather="cast"></span></button>
+          </div>
+          <div class="form-group">
+            <label for="chatbotfile">Current chatbot file content:</label>
+            <textarea class="form-control" v-model="current_chatbotfile.content" id="chatbotfile" name="chatbotfile" rows="20"></textarea>
+          </div>
+          <br>
+          <div class="row">
+            <div class="col-md-9">
+                <select class="form-select" name="chatbotfiles" @change="setChatbotfileIndex($event,$event.target.selectedIndex)">
+                  <option v-for="chatbotfile in chatbotfiles" v-bind:value="chatbotfile"> {{ chatbotfile }} </option>
+                </select>
+            </div>
+            <div class="col-md-3">
+                <button @click="listChatbotfiles" class="btn  btn-lg btn-success">Chatbot Files</button>
+            </div>
+          </div>
+          <div class="row">
+          <div class="botton-grid mb-3">
+              <!-- <button :disabled="!connected || action.status.status == 1" @click="setGoal" class="btn btn-danger btn-lg">Set</button> -->
+              <button @click="readChatbot" class="btn btn-danger btn-lg">Read</button>
+              <button @click="saveChatbot" class="btn btn-danger btn-lg">Save</button>
+              <button @click="trainChatbot" class="btn btn-danger btn-lg">Train</button>
+              <button @click="runChatbot" class="btn btn-danger btn-lg">Run</button>
+              <label class="form-label" for="current_chatbotfile_name">Name: </label>
+              <input type="text" size="16" v-model="current_chatbotfile_name" name="current_chatbotfile_name" id="current_chatbotfile_name"/>
+          </div>
+        </div>
+        <div class="row">
+          <div class="col-md-12">
+            <div class="form-group">
+                <input type="text" size="10" class="form-control" id="syscmd_feedback" v-model="syscmd_feedback" disabled />
+            </div>
+          </div>
+        </div>
+        <br>
+        </main>
+   </div>
+</div>
+
+<script type="text/javascript" src="/javascripts/eventemitter2.js"></script>
+<script type="text/javascript" src="/javascripts/roslib.js"></script>
+<script type="text/javascript" src="/javascripts/three.min.js"></script>
+<script type="text/javascript" src="/javascripts/axios.min.js"></script>
+<script type="text/javascript" src="/javascripts/vue.min.js"></script>
+<script type="text/javascript" src="/javascripts/vuejs-datepicker.js"></script>
+<!-- Main -->
+<script type="text/javascript" src="/javascripts/main.js"></script>
+<!-- Icons -->
+<script type="text/javascript" src="/javascripts/feather.min.js"></script>
+<script>
+  feather.replace()
+</script>

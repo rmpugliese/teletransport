@@ -1,0 +1,7 @@
+#!/bin/bash
+# to be called with parameter mapname to load a map
+/bin/cp /opt/teletransport-main/public/maps/$1.yml /util/ros/jobot/map/map.yml
+/bin/cp /opt/teletransport-main/public/maps/$1.pbstream /util/ros/jobot/map/map.pbstream
+/bin/cp /opt/teletransport-main/public/maps/$1.json /util/ros/jobot/map/map.json
+/bin/cp /opt/teletransport-main/public/maps/$1.jpg /util/ros/jobot/map/map.jpg
+

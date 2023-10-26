@@ -1,0 +1,7 @@
+#!/bin/bash
+# to be called after generating a new .json with mapname as parameter
+/bin/cp /opt/teletransport-main/public/maps/map.json /util/ros/jobot/map/map.json
+/bin/cp /util/ros/jobot/map/map.yml /opt/teletransport-main/public/maps/$1.yml
+/bin/cp /util/ros/jobot/map/map.pbstream /opt/teletransport-main/public/maps/$1.pbstream
+/bin/cp /util/ros/jobot/map/map.jpg /opt/teletransport-main/public/maps/$1.jpg
+/bin/cp /util/ros/jobot/map/map.json /opt/teletransport-main/public/maps/$1.json

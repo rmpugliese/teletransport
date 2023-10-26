@@ -1,0 +1,62 @@
+<% layout('layouts/boilerplate')%>
+
+<div id="app" class="container-fluid">
+   <div class="row">
+        <%- include('./jobotSidebar')%>
+        <main role="main" class="col-md-9 ml-sm-auto col-lg-10 px-4">
+          <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+            <h1 class="h2">Dashboard @(<%= robot.title %>) </h1>
+            <b>
+              <p class="text-danger" v-if="!connected">Not connected!</p>
+    				  <p class="text-success" v-if="connected">Connected!</p>
+              <p class="text-success">{{ rosbridge_address }}</p>
+            </b>
+            <input type="hidden" id="current_user_id" name= "current_user_id" value="<%= currentUser._id %>" />
+            <input type="hidden" id="robot_id" name="robot_id" value="<%= robot.id %>" />
+            <input type="hidden" id="connecturl" name="connecturl" value="<%= robot.connecturl %>" />
+            <button :disabled="loading" class="btn btn-danger" @click="disconnect" v-if="connected">Disconnect!</button>
+            <button :disabled="loading" class="btn btn-success" @click="connect" v-else>Connect!</button>
+            <button :disabled="loading" class="btn btn-success" @click="remote"><span data-feather="cast"></span></button>
+            <button class="btn btn-info" @click="git"><span data-feather="info"></span></button>
+          </div>
+          <div class="row align-items-center mt-4">
+            <img id="my_image" src="<%=robot.images[0].url%>" class="figure-img img-fluid" alt="Responsive video stream from Jobot">
+            <figcaption class="figure-caption">Compressed image stream from Jobot.</figcaption>
+         </div>
+         <div class="row" id="status">
+              <div class="w-100 text-center">
+               <hr>
+               <label>Workflow: </label>
+               <input type="text" size="40" v-model="current_workflow_name" disabled />
+               <label>Battery: </label>
+               <input type="number" v-model.number="current_battery_voltage.toFixed(2)" disabled />
+               <input type="number" v-model.number="current_battery_capacity" disabled />
+               <hr>
+               <label>Log: </label>
+               <input type="text" size="80" v-model="running_mission_log" disabled />
+               <hr>
+               <button :disabled="!current_hardware.st_Ros_BumpFront" class="btn btn-info btn-lg">Bumper Front</button>
+               <button :disabled="!current_hardware.st_Ros_BumpRear" class="btn btn-info btn-lg">Bumper Rear</button>
+               <button :disabled="!current_hardware.st_Ros_Recharge_On" class="btn btn-info btn-lg">Recharge On</button>
+               <button :disabled="!current_hardware.st_Ros_Recharge_Ok" class="btn btn-info btn-lg">Recharge Ok</button>
+               <button :disabled="!current_hardware.st_Ros_Emergenza" class="btn btn-info btn-lg">Emergency</button>
+               <hr>
+              </div>
+         </div>
+        </main>
+   </div>
+</div>
+
+<script type="text/javascript" src="/javascripts/eventemitter2.js"></script>
+<script type="text/javascript" src="/javascripts/roslib.js"></script>
+<script type="text/javascript" src="/javascripts/three.min.js"></script>
+<script type="text/javascript" src="/javascripts/axios.min.js"></script>
+<script type="text/javascript" src="/javascripts/vue.min.js"></script>
+<script type="text/javascript" src="/javascripts/vuejs-datepicker.js"></script>
+<!-- Main -->
+<script type="text/javascript" src="/javascripts/main.js"></script>
+<!-- Icons -->
+<script type="text/javascript" src="/javascripts/feather.min.js"></script>
+<script>
+  feather.replace()
+</script>

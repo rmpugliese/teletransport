@@ -1,0 +1,16 @@
+#!/bin/bash
+/bin/cp /util/ros/jobot/map/map.yml /opt/teletransport-main/public/maps/$1.yml
+/bin/cp /util/ros/jobot/map/map.json /opt/teletransport-main/public/maps/$1.json
+/bin/cp /util/ros/jobot/map/map.pbstream /opt/teletransport-main/public/maps/$1.pbstream
+if [[ $# -ge 2 ]]
+then
+/bin/cp /opt/teletransport-main/public/maps/$1 /opt/teletransport-main/public/maps/$2.jpg
+/bin/cp /opt/teletransport-main/public/maps/$1.yml /opt/teletransport-main/public/maps/$2.yml
+/bin/cp /opt/teletransport-main/public/maps/$1.json /opt/teletransport-main/public/maps/$2.json
+/bin/cp /opt/teletransport-main/public/maps/$1.pbstream /opt/teletransport-main/public/maps/$2.pbstream
+else
+/bin/cp /opt/teletransport-main/public/maps/$1 /opt/teletransport-main/public/maps/map.jpg
+/bin/cp /opt/teletransport-main/public/maps/$1.yml /opt/teletransport-main/public/maps/map.yml
+/bin/cp /opt/teletransport-main/public/maps/$1.json /opt/teletransport-main/public/maps/map.json
+/bin/cp /opt/teletransport-main/public/maps/$1.pbstream /opt/teletransport-main/public/maps/map.pbstream
+fi

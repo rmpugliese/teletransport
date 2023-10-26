@@ -1,0 +1,71 @@
+<% layout('layouts/boilerplate')%>
+
+<div id="app" class="container-fluid">
+   <div class="row">
+        <%- include('./jobotSidebar')%>
+        <main role="main" class="col-md-9 ml-sm-auto col-lg-10 px-4">
+          <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+            <h1 class="h2">Statistics and Reports @(<%= robot.title %>) </h1>
+            <b>
+              <p class="text-danger" v-if="!connected">Not connected!</p>
+    				  <p class="text-success" v-if="connected">Connected!</p>
+              <p class="text-success">{{ rosbridge_address }}</p>
+            </b>
+            <input type="hidden" id="current_user_id" name= "current_user_id" value="<%= currentUser._id %>" />
+            <input type="hidden" id="connecturl" name="connecturl" value="<%= robot.connecturl %>" />
+            <input type="hidden" id="robot_id" name="robot_id" value="<%= robot.id %>" />
+            <button :disabled="loading" class="btn btn-danger" @click="disconnect" v-if="connected">Disconnect!</button>
+    				<button :disabled="loading" class="btn btn-success" @click="connect" v-else>Connect!</button>
+            <button :disabled="loading" class="btn btn-success" @click="remote"><span data-feather="cast"></span></button>
+          </div>
+          <hr>
+          <div class="row align-items-center mt-4">
+            <div class="col-md-6 text-center">
+              <vuejs-datepicker @selected="selectEvents" v-model="selected_date" name="uniquename"></vuejs-datepicker>
+            </div>
+            <div class="col-md-3 text-center">
+                {{ events.length }} / {{ all_events.length }}
+            </div>
+            <div class="col-md-3 text-right">
+        <!--    <button @click="getEvents" :disabled="loading || !connected" class="btn btn-warning btn-lg">Get Events</button> -->
+                <button @click="getEvents" class="btn btn-warning btn-lg">Get Events</button>
+            </div>
+          </div>
+          <hr>
+          <table class="table">
+            <thead>
+              <tr>
+                <th scope="col">Action</th>
+                <th scope="col">Start</th>
+                <th scope="col">End</th>
+                <th scope="col">Distance</th>
+                <th scope="col">Result</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr v-for="event in events">
+                <td>{{event.action}}</td>
+                <td>{{event.start}}</td>
+                <td>{{event.end}}</td>
+                <td>{{event.distance}}</td>
+                <td>{{event.result}}</td>
+              </tr>
+            </tbody>
+          </table>
+        </main>
+   </div>
+</div>
+
+<script type="text/javascript" src="/javascripts/eventemitter2.js"></script>
+<script type="text/javascript" src="/javascripts/roslib.js"></script>
+<script type="text/javascript" src="/javascripts/three.min.js"></script>
+<script type="text/javascript" src="/javascripts/axios.min.js"></script>
+<script type="text/javascript" src="/javascripts/vue.min.js"></script>
+<script type="text/javascript" src="/javascripts/vuejs-datepicker.js"></script>
+<!-- Main -->
+<script type="text/javascript" src="/javascripts/main.js"></script>
+<!-- Icons -->
+<script type="text/javascript" src="/javascripts/feather.min.js"></script>
+<script>
+  feather.replace()
+</script>

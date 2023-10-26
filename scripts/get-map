@@ -1,0 +1,6 @@
+#!/bin/bash
+# to be called after map.jpg and map.json generation just after acquisition
+/bin/cp /util/ros/jobot/map/map.yml /opt/teletransport-main/public/maps/map.yml
+/bin/cp /util/ros/jobot/map/map.pbstream /opt/teletransport-main/public/maps/map.pbstream
+/bin/cp /opt/teletransport-main/public/maps/map.jpg /util/ros/jobot/map/map.jpg
+/bin/cp /opt/teletransport-main/public/maps/map.json /util/ros/jobot/map/map.json

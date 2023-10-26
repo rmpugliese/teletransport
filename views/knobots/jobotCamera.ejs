@@ -1,0 +1,41 @@
+<% layout('layouts/boilerplate')%>
+
+<div id="app" class="container-fluid">
+   <div class="row">
+        <%- include('./jobotSidebar')%>
+        <main role="main" class="col-md-9 ml-sm-auto col-lg-10 px-4">
+          <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+            <h1 class="h2">Camera @(<%= robot.title %>) </h1>
+            <b>
+              <p class="text-danger" v-if="!connected">Not connected!</p>
+    				  <p class="text-success" v-if="connected">Connected!</p>
+              <p class="text-success">{{ rosbridge_address }}</p>
+            </b>
+            <input type="hidden" id="current_user_id" name= "current_user_id" value="<%= currentUser._id %>" />
+            <input type="hidden" id="connecturl" name="connecturl" value="<%= robot.connecturl %>" />
+            <input type="hidden" id="robot_id" name="robot_id" value="<%= robot.id %>" />
+            <button :disabled="loading" class="btn btn-danger" @click="disconnect" v-if="connected">Disconnect!</button>
+    				<button :disabled="loading" class="btn btn-success" @click="connect" v-else>Connect!</button>
+            <button :disabled="loading" class="btn btn-success" @click="remote"><span data-feather="cast"></span></button>
+          </div>
+          <div class="row align-items-center mt-4">
+         		<img id="my_image" src="<%=robot.images[0].url%>" class="figure-img img-fluid" alt="Responsive video stream from Jobot">
+         	  <figcaption class="figure-caption">Compressed image stream from Jobot.</figcaption>
+         </div>
+        </main>
+   </div>
+</div>
+
+<script type="text/javascript" src="/javascripts/eventemitter2.js"></script>
+<script type="text/javascript" src="/javascripts/roslib.js"></script>
+<script type="text/javascript" src="/javascripts/three.min.js"></script>
+<script type="text/javascript" src="/javascripts/axios.min.js"></script>
+<script type="text/javascript" src="/javascripts/vue.min.js"></script>
+<script type="text/javascript" src="/javascripts/vuejs-datepicker.js"></script>
+<!-- Main -->
+<script type="text/javascript" src="/javascripts/main.js"></script>
+<!-- Icons -->
+<script type="text/javascript" src="/javascripts/feather.min.js"></script>
+<script>
+  feather.replace()
+</script>

@@ -1,0 +1,3 @@
+#!/bin/bash
+
+dig  -x $(/util/scripts/get-wifi-ipv4 |cut -d '/' -f 1) +noall +answer|grep PTR| awk '{print $NF}'

@@ -1,0 +1,3 @@
+#!/bin/bash
+
+ip link show $(/util/scripts/list-wifi-devices)|grep ether |awk '{print $2}'

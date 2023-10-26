@@ -1,0 +1,124 @@
+<% layout('layouts/boilerplate')%>
+
+<div id="app" class="container-fluid">
+   <div class="row">
+        <%- include('./jobotSidebar')%>
+        <main role="main" class="col-md-9 ml-sm-auto col-lg-10 px-4">
+          <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+            <h1 class="h2">Missions @(<%= robot.title %>) </h1>
+            <b>
+              <p class="text-danger" v-if="!connected">Not connected!</p>
+    				  <p class="text-success" v-if="connected">Connected!</p>
+              <p class="text-success">{{ rosbridge_address }}</p>
+            </b>
+            <input type="hidden" id="current_user_id" name= "current_user_id" value="<%= currentUser._id %>" />
+            <input type="hidden" id="connecturl" name="connecturl" value="<%= robot.connecturl %>" />
+            <input type="hidden" id="robot_id" name="robot_id" value="<%= robot.id %>" />
+            <button :disabled="loading" class="btn btn-danger" @click="disconnect" v-if="connected">Disconnect!</button>
+    				<button :disabled="loading" class="btn btn-success" @click="connect" v-else>Connect!</button>
+            <button :disabled="loading" class="btn btn-success" @click="remote"><span data-feather="cast"></span></button>
+          </div>
+          <hr>
+          <div class="row">
+            <div class="col">
+              <select class="form-select" name="Points" @change="setMissionIndex($event,$event.target.selectedIndex)">
+                <option v-for="mission in robot.missions" value="{{mission.name}}"> Name: {{mission.name}} </option>
+              </select>
+              </div>
+              <div class="col">
+                <button class="btn btn-lg btn-danger" @click="loadMission">Load Mission</button>
+              </div>
+          </div>
+          <div class="form-group">
+            <label for="missionName">Mission Name</label>
+            <input class="form-control" v-model="current_mission.name" type="text" placeholder="Mission Name">
+            <label for="missionParameters">Mission Parameters (argv1:argv2:...:argvn)</label>
+            <input class="form-control" v-model="current_mission_parameters" type="text" placeholder="Mission Parameters">
+            <label for="missionTasks">Mission Tasks</label>
+            <ul class="list-group">
+              <li v-for="task,idx in current_mission.tasks" v-bind:class="idx == current_mission_task ? 'active' : ''" class="list-group-item">{{idx}}:{{task.label}} > [{{task.condition}}] {{task.type}}({{task.parameters}}) : {{task.timeout}} | {{task.fallback}} </li>
+            </ul>
+            <hr>
+            <div class="botton-grid mb-3">
+              <div class="w-100 text-center">
+                <!-- <button :disabled="!connected || action.status.status == 1" @click="setGoal" class="btn btn-danger btn-lg">Set</button> -->
+                <label><b>Remote:</b></label>
+                <button :disabled="!connected || running_mission || !current_mission.tasks.length" @click="runMission" class="btn btn-danger btn-lg">Run</button>
+                <button :disabled="!connected || !running_mission" @click="cancelMission" class="btn btn-danger btn-lg">Cancel</button>
+                <button :disabled="!connected || !running_mission" class="btn btn-danger btn-lg" @click="pauseMission" v-if="running_mission">Pause</button>
+        				<button :disabled="!connected || !current_mission_task" class="btn btn-danger btn-lg" @click="playMission" v-else>Play</button>
+                <button :disabled="!connected || !running_mission_error" class="btn btn-danger btn-lg">Error</button>
+                <label><b>Autonomous:</b></label>
+                <button :disabled="!connected" @click="robotLock" class="btn btn-warning btn-lg">Lock</button>
+                <button :disabled="!connected" @click="robotUnlock" class="btn btn-danger btn-lg">UnLock</button>
+                <button :disabled="!connected" @click="robotSend" class="btn btn-danger btn-lg">Send</button>
+                <button :disabled="!connected" @click="robotCancel" class="btn btn-danger btn-lg">Cancel</button>
+                <hr>
+                <label><b>Workflows:</b></label>
+                <button @click="workflowAction('JobotDefaultIdleWorkflow')" :disabled="loading || !connected" class="btn btn-warning btn-lg">Idle</button>
+                <button @click="workflowAction('JobotDefaultMappingWorkflow')" :disabled="loading || !connected" class="btn btn-danger btn-lg">Mapping</button>
+                <button @click="workflowAction('JobotDefaultNavigationWorkflow')" :disabled="loading || !connected" class="btn btn-warning btn-lg">Navigate</button>
+                <label><b>Docking:</b></label>
+                <button @click="autoDock('dock')" :disabled="loading || !connected" class="btn btn-warning btn-lg">Dock</button>
+                <button @click="autoDock('undock')" :disabled="loading || !connected" class="btn btn-warning btn-lg">UnDock</button>
+                <button @click="autoDock('cancel')" :disabled="loading || !connected" class="btn btn-danger btn-lg">Cancel</button>
+
+              </div>
+            </div>
+            <hr>
+            <div class="row" id="pose">
+             <div class="w-100 text-center">
+             <label>Pose: X</label>
+             <input type="number" v-model.number="pose.position.x.toFixed(3)" disabled />
+             <label>Y</label>
+             <input type="number" v-model.number="pose.position.y.toFixed(3)" disabled />
+             <label>Z</label>
+             <input type="number" v-model.number="pose.rotation.z.toFixed(3)" disabled />
+             </div>
+            </div>
+            <hr>
+            <div class="w-100 text-center">
+              <label>Action Status: </label>
+               <input type="text" size="30" v-model="action.status.text" disabled />
+               <input type="number" v-model.number="action.status.status" disabled />
+               <label>d: </label>
+               <input type="number" v-model.number="robot_goal_distance.toFixed(3)" disabled />
+            </div>
+            <div class="row" id="status">
+                 <div class="w-100 text-center">
+                  <hr>
+                  <label>Workflow: </label>
+                  <input type="text" size="40" v-model="current_workflow_name" disabled />
+                  <label>Battery: </label>
+                  <input type="number" v-model.number="current_battery_voltage.toFixed(2)" disabled />
+                  <input type="number" v-model.number="current_battery_capacity" disabled />
+                  <hr>
+                  <label>Log: </label>
+                  <input type="text" size="80" v-model="running_mission_log" disabled />
+                  <hr>
+                  <button :disabled="!current_hardware.st_Ros_BumpFront" class="btn btn-info btn-lg">Bumper Front</button>
+                  <button :disabled="!current_hardware.st_Ros_BumpRear" class="btn btn-info btn-lg">Bumper Rear</button>
+                  <button :disabled="!current_hardware.st_Ros_Recharge_On" class="btn btn-info btn-lg">Recharge On</button>
+                  <button :disabled="!current_hardware.st_Ros_Recharge_Ok" class="btn btn-info btn-lg">Recharge Ok</button>
+                  <button :disabled="!current_hardware.st_Ros_Emergenza" class="btn btn-info btn-lg">Emergency</button>
+                  <hr>
+                 </div>
+            </div>
+          </div>
+        </main>
+   </div>
+</div>
+
+<script type="text/javascript" src="/javascripts/eventemitter2.js"></script>
+<script type="text/javascript" src="/javascripts/roslib.js"></script>
+<script type="text/javascript" src="/javascripts/three.min.js"></script>
+<script type="text/javascript" src="/javascripts/axios.min.js"></script>
+<script type="text/javascript" src="/javascripts/vue.min.js"></script>
+<script type="text/javascript" src="/javascripts/vuejs-datepicker.js"></script>
+<!-- Main -->
+<script type="text/javascript" src="/javascripts/main.js"></script>
+<!-- Icons -->
+<script type="text/javascript" src="/javascripts/feather.min.js"></script>
+<script>
+  feather.replace()
+</script>

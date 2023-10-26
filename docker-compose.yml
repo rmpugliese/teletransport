@@ -1,0 +1,25 @@
+version: '3'
+services:
+  node:
+    env_file:
+      - "./.env"
+    restart: always
+    build: .
+    ports:
+      - 8300:3000
+    volumes:
+      - ./:/app
+  mongo:
+    image: mongo
+    ports:
+      - 27017:27017
+    volumes:
+      - mongodb:/data/db
+volumes:
+  mongodb:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: /opt/persistence/mongodb_data
+

@@ -1,0 +1,41 @@
+.map-container { margin: 2rem 0; }
+.map-wrapper { position: relative; }
+.icon {
+	max-width: 36px;
+	height: auto;
+}
+.icon-marker {
+	position: absolute;
+	z-index: 1;
+	top: 0;
+	left: 0;
+}
+.goal-wrapper {
+	position: absolute;
+	z-index:1;
+}
+#dragstartzone {
+	position: relative;
+	display: inline-block;
+	width: 200px;
+	height: 200px;
+	border: 1px solid #333;
+	border-radius: 50%;
+	z-index: 10;
+	-moz-user-select: -moz-none;
+	-khtml-user-select: none;
+	-webkit-user-select: none;
+}
+#dragCircle {
+	position: absolute;
+	z-index: 9;
+	border: 1px solid transparent;
+	border-radius: 50%;
+	background-color: rgba(0, 0, 0, 30%);
+	-moz-user-select: -moz-none;
+	-khtml-user-select: none;
+	-webkit-user-select: none;
+}
+#dragCircle:hover {
+	background-color: lightcoral;
+}

@@ -1,0 +1,85 @@
+<% layout('layouts/boilerplate')%>
+
+<div class="container d-flex justify-content-center align-items-center mt-5">
+    <div class="row">
+        <div class="col-md-6 offset-md-3 col-xl-4 offset-xl-4">
+            <div class="card shadow">
+                <img src="/images/home.jpg"
+                    alt="" class="card-img-top" />
+                <div class="card-body">
+                    <h5 class="card-title">Login</h5>
+                    <form action="/login" method="POST" class="validated-form" novalidate>
+                        <div class="mb-3">
+                            <label class="form-label" for="username">Username</label>
+                            <input class="form-control" type="text" onfocus="focusUsername()" id="username" name="username" required>
+                            <div class="valid-feedback">
+                                Looks good!
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label" for="password">Password</label>
+                            <input class="form-control" type="password" onfocus="focusPassword()" id="password" name="password" required>
+                            <div class="valid-feedback">
+                                Looks good!
+                            </div>
+                        </div>
+                        <div class="row">
+                         <div class="col-md-10">
+                          <button class="btn btn-success btn-block">Login</button>
+                         </div>
+                         <div class="col-md-2">
+                          <button onclick="toggleKeyboard()" class="btn btn-success btn-block"><span id="eye" data-feather="grid"></span></button>
+                         </div>
+                       </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<br>
+<div class="simple-keyboard" id="keyboard"></div>
+
+<script type="text/javascript" src="/javascripts/simple-keyboard.js"></script>
+<script>
+  function toggleKeyboard() {
+    var el = document.getElementById('keyboard');
+    el.classList.toggle('d-none');
+  }
+  function focusUsername() {
+    focusElement = 'username';
+    keyboard.clearInput();
+  }
+  function focusPassword() {
+    focusElement = 'password';
+    keyboard.clearInput();
+  }
+  const Keyboard = window.SimpleKeyboard.default;
+  const keyboard = new Keyboard({
+    onChange: input => onChange(input),
+    onKeyPress: button => onKeyPress(button)
+  });
+  let caps = false;
+  let focusElement = '';
+  function onChange(input){
+    document.getElementById(focusElement).value = input;
+    // console.log("Input: ",input);
+  }
+  function onKeyPress(button){
+    // console.log("Button pressed", button);
+    if (button == "{lock}") caps = !caps;
+    if (caps) {
+      keyboard.setOptions({
+        layoutName: 'shift'
+      });
+    } else {
+      keyboard.setOptions({
+        layoutName: 'default'
+      });
+    }
+    // button =  button.toUpperCase();
+    // console.log("Real button pressed", button);
+  }
+  toggleKeyboard();
+</script>

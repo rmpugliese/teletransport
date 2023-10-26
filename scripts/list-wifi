@@ -1,0 +1,3 @@
+#!/bin/bash
+
+sudo /sbin/iw dev $(/util/scripts/list-wifi-devices) scan|grep SSID|sort|uniq|awk '{print $2}'

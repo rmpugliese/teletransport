@@ -1,0 +1,70 @@
+<% layout('layouts/boilerplate')%>
+
+<div id="app" class="container-fluid">
+   <div class="row">
+        <%- include('./jobotSidebar')%>
+        <main role="main" class="col-md-9 ml-sm-auto col-lg-10 px-4" id="touchscreen">
+          <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+            <h1 class="h2">Conference @(<%= robot.title %>) </h1>
+            <b>
+              <p class="text-danger" v-if="!connected">Not connected!</p>
+    				  <p class="text-success" v-if="connected">Connected!</p>
+              <p class="text-success">{{ rosbridge_address }}</p>
+            </b>
+            <input type="hidden" id="current_user_id" name= "current_user_id" value="<%= currentUser._id %>" />
+            <input type="hidden" id="connecturl" name="connecturl" value="<%= robot.connecturl %>" />
+            <input type="hidden" id="robot_id" name="robot_id" value="<%= robot.id %>" />
+            <button :disabled="loading" class="btn btn-danger" @click="disconnect" v-if="connected">Disconnect!</button>
+    				<button :disabled="loading" class="btn btn-success" @click="connect" v-else>Connect!</button>
+            <button :disabled="loading" class="btn btn-success" @click="remote"><span data-feather="cast"></span></button>
+          </div>
+          <div class="row align-items-center mt-4">
+            <div class="col-md-8">
+              <img id="my_image" src="<%=robot.images[0].url%>" class="figure-img img-fluid" alt="Responsive video stream from Jobot">
+            </div>
+            <div class="col-md-4">
+             <div class="card">
+               <div class="card-body text-center" id="pose">
+                 <p>{{ current_workflow_name }} / {{ current_battery_voltage.toFixed(2) }} / {{ current_battery_capacity }}</p>
+                 <hr>
+                 <p>Some actions for the robot</p>
+                 <!-- <div id="dragstartzone" @mousedown="startDrag" @mousemove="doDrag"> -->
+                 <div id="dragstartzone" @touchstart="startDrag" @touchmove="doDrag" @mousedown="startDrag" @mousemove="doDrag">
+                 </div>
+                 <div id="dragCircle" :style="dragCircleStyle"></div>
+               </div>
+             </div>
+             <div class="card">
+                <div>
+                    <select class="form-select"  name="Points" @change="setPoint($event,$event.target.selectedIndex)">
+                     <option v-for="goal in current_map.goals" value="{{goal.name}}"> Name: {{goal.name}} ({{goal.x}},{{goal.y}},{{goal.z}}) [{{goal.type}}] </option>
+                    </select>
+                </div>
+                <hr>
+                <div class="botton-grid text-center" id="status">
+                    <button :disabled="!connected || action.status.status == 1" @click="setGoal" class="btn btn-danger">Set</button>
+                    <button :disabled="!connected || action.status.status == 1" @click="sendGoal" class="btn btn-danger">Start</button>
+                    <button :disabled="!connected || ![1].includes(action.status.status)" @click="cancelGoal" class="btn btn-danger">Cancel</button>
+                    <button :disabled="!connected" @click="videoconferenceCall" class="btn btn-success"><span data-feather="phone-call"></span></button>
+                    <button :disabled="!connected" @click="videoconferenceOff" class="btn btn-success"><span data-feather="phone-off"></span></button>
+                </div>
+             </div>
+           </div>
+         </div>
+        </main>
+   </div>
+</div>
+
+<script type="text/javascript" src="/javascripts/eventemitter2.js"></script>
+<script type="text/javascript" src="/javascripts/roslib.js"></script>
+<script type="text/javascript" src="/javascripts/three.min.js"></script>
+<script type="text/javascript" src="/javascripts/axios.min.js"></script>
+<script type="text/javascript" src="/javascripts/vue.min.js"></script>
+<script type="text/javascript" src="/javascripts/vuejs-datepicker.js"></script>
+<!-- Main -->
+<script type="text/javascript" src="/javascripts/main.js"></script>
+<!-- Icons -->
+<script type="text/javascript" src="/javascripts/feather.min.js"></script>
+<script>
+  feather.replace()
+</script>

@@ -1,0 +1,9 @@
+#!/bin/bash
+
+OAKD_VP=$(lsusb |grep Movidius |awk '{print $6}' | awk -F ':' '{print "-v 0x" $1 , "-p 0x" $2}')
+
+if [ x"$OAKD_VP" == x"" ]; then
+	echo "oakd not found"
+	exit 1
+fi
+sudo usb_modeswitch $OAKD_VP --reset-usb

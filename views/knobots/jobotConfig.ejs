@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Teletransport.me</title>
+    <link rel="stylesheet" href="/stylesheets/bootstrap.min.css"></script>
+    <script src='/javascripts/mapbox-gl.js'></script>
+    <link href='/stylesheets/mapbox-gl.css' rel='stylesheet' />
+    <link rel="stylesheet" href="/stylesheets/app.css">
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+    <link rel="manifest" href="/site.webmanifest">
+    <link rel="mask-icon" href="/safari-pinned-tab.svg" color="#5bbad5">
+    <meta name="msapplication-TileColor" content="#da532c">
+    <meta name="theme-color" content="#ffffff">
+    <link rel="stylesheet" href="/stylesheets/simple-keyboard.css">
+    <link rel="stylesheet" href="/stylesheets/knobots.css">
+
+</head>
+<body class="d-flex flex-column vh-100">
+<div id="app" class="container-fluid">
+   <div class="row">
+        <main role="main" class="col-md-12 ml-sm-auto px-4">
+          <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+            <h1 class="h2">
+              <a class="nav-link" href="/knobots/<%=robot._id%>/screen">
+                <span data-feather="airplay"></span>
+                Screen
+              </a>
+              <a class="nav-link" href="/knobots/<%=robot._id%>/config">
+                <span data-feather="radio"></span>
+                Config
+              </a>
+              <a class="nav-link" href="/knobots/<%=robot._id%>/apps">
+                <span data-feather="grid"></span>
+                Apps
+              </a>
+            </h1>
+            <!-- <b>
+              <p class="text-danger" v-if="!connected">Not connected!</p>
+    				  <p class="text-success" v-if="connected">Connected!</p>
+              <p class="text-success">{{ rosbridge_address }}</p>
+            </b> -->
+            <input type="hidden" id="robot_id" name="robot_id" value="<%= robot.id %>" />
+            <input type="hidden" id="connecturl" name="connecturl" value="<%= robot.connecturl %>" />
+            <!-- <button :disabled="loading" class="btn btn-danger" @click="disconnect" v-if="connected">Disconnect!</button>
+    				<button :disabled="loading" class="btn btn-success" @click="connect" v-else>Connect!</button> -->
+          </div>
+          <div class="row">
+            <div class="col-md-9">
+              <div class="form-group">
+                  <input type="text" size="10" class="form-control" id="network_mac" v-model="network_mac" disabled />
+              </div>
+            </div>
+            <div class="col-md-3">
+                <button @click="getMacAddr" class="btn btn-success">Get Mac Address</button>
+            </div>
+          </div>
+          <br>
+          <div class="row">
+            <div class="col-md-9">
+                <select class="form-select" name="Networks" @change="setNetworkIndex($event,$event.target.selectedIndex)">
+                  <!-- <option v-for="network in networks" value="{{ network.ssid }}"> {{ network.ssid }} ({{ network.signal }}) </option> -->
+                  <option v-for="network in networks" v-bind:value="network"> {{ network }} </option>
+                </select>
+            </div>
+            <div class="col-md-3">
+                <button @click="getNet" class="btn btn-success">Get Networks</button>
+            </div>
+          </div>
+          <br>
+          <div class="row">
+            <div class="col-md-6">
+              <div class="form-group">
+                  <label for="network_password">Network:</label>
+                  <input type="text" size="10" class="form-control" v-model="network_ssid" disabled />
+              </div>
+            </div>
+            <div class="col-md-3">
+              <div class="form-group">
+                <label>Password:</label>
+                <!-- <input type="password" class="form-control" v-model="network_password" placeholder="Tap Network Password on the virtual keyboard ..."> -->
+                <div class="input-group" id="show_hide_password">
+                  <input type="password" id="netpass" class="form-control" v-model="network_password" placeholder="Tap Network Password on the virtual keyboard ...">
+                  <div class="input-group-addon">
+                    <button @click="setHidden" class="btn btn-danger"><span id="eye" data-feather="eye"></span><span id="eye-off" data-feather="eye-off" style="visibility:hidden"></span></button>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="col-md-3">
+                <br>
+                <!-- <button @click="selectNet" class="btn btn-danger">Select Network</button> -->
+                <button @click="setNet" class="btn btn-danger">Connect</button>
+                <button @click="delNet" class="btn btn-danger">Disconnect</button>
+            </div>
+          </div>
+          <hr>
+          <div class="row">
+            <!-- <input type="password" class="input" placeholder="Tap on the virtual keyboard to start" /> -->
+            <div class="simple-keyboard"></div>
+          </div>
+          <hr>
+          <div class="row">
+            <div class="col-md-9">
+              <div class="form-group">
+                  <input type="text" size="10" class="form-control" id="network_ip" v-model="network_ip" disabled />
+              </div>
+            </div>
+            <div class="col-md-3">
+                <button @click="getIpAddr" class="btn btn-success">Get Ip Address</button>
+            </div>
+          </div>
+          <br>
+          <div class="row">
+            <div class="col-md-9">
+              <div class="form-group">
+                  <input type="text" size="10" class="form-control" id="network_name" v-model="network_name" disabled />
+              </div>
+            </div>
+            <div class="col-md-3">
+                <button @click="getNameAddr" class="btn btn-success">Get Name Address</button>
+            </div>
+          </div>
+          <br>
+          <div class="row">
+            <div class="col-md-9">
+              <div class="form-group">
+                  <input type="text" size="10" class="form-control" id="syscmd_feedback" v-model="syscmd_feedback" disabled />
+              </div>
+            </div>
+            <div class="col-md-3">
+                <button @click="execSysCmd('jobot-reboot')" class="btn btn-success">System Restart</button>
+                <button @click="execSysCmd('jobot-vision')" class="btn btn-success">Vision Restart</button>
+                <button @click="execSysCmd('jobot-selfcontrol')" class="btn btn-success">SelfControl Restart</button>
+            </div>
+          </div>
+          <br>
+     </div>
+   </main>
+ </div>
+</div>
+
+<script type="text/javascript" src="/javascripts/eventemitter2.js"></script>
+<script type="text/javascript" src="/javascripts/roslib.js"></script>
+<script type="text/javascript" src="/javascripts/three.min.js"></script>
+<script type="text/javascript" src="/javascripts/axios.min.js"></script>
+<script type="text/javascript" src="/javascripts/vue.min.js"></script>
+<script type="text/javascript" src="/javascripts/vuejs-datepicker.js"></script>
+<!-- Main -->
+<script type="text/javascript" src="/javascripts/main.js"></script>
+<!-- Icons -->
+<script type="text/javascript" src="/javascripts/feather.min.js"></script>
+<script>
+  feather.replace();
+</script>
+<script type="text/javascript" src="/javascripts/simple-keyboard.js"></script>
+<script>
+  const Keyboard = window.SimpleKeyboard.default;
+  const keyboard = new Keyboard({
+    onChange: input => onChange(input),
+    onKeyPress: button => onKeyPress(button)
+  });
+  let caps = false;
+  function onChange(input){
+    // document.querySelector(".input").value = input;
+    document.getElementById('netpass').value = input;
+    app.network_password = input;
+    // console.log("Input changed", input);
+  }
+  function onKeyPress(button){
+    // console.log("Button pressed", button);
+    if (button == "{lock}") caps = !caps;
+    if (caps) {
+      keyboard.setOptions({
+        layoutName: 'shift'
+      });
+    } else {
+      keyboard.setOptions({
+        layoutName: 'default'
+      });
+    }
+    // button =  button.toUpperCase();
+    // console.log("Real button pressed", button);
+  }
+</script>
+</body>
+</html>

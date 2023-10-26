@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Teletransport.me</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/5.0.0-alpha1/css/bootstrap.min.css"
+        integrity="sha384-r4NyP46KrjDleawBgD5tp8Y7UzmLA05oM1iAEQ17CSuDqnUK2+k9luXQOfXJCJ4I" crossorigin="anonymous">
+    <script src="https://cdn.jsdelivr.net/npm/bs-custom-file-input/dist/bs-custom-file-input.js"></script>
+
+    <script src='https://api.mapbox.com/mapbox-gl-js/v1.12.0/mapbox-gl.js'></script>
+    <link href='https://api.mapbox.com/mapbox-gl-js/v1.12.0/mapbox-gl.css' rel='stylesheet' />
+    <link rel="stylesheet" href="/stylesheets/app.css">
+    <!-- <link rel="stylesheet" href="/stylesheets/home.css"> -->
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+    <link rel="manifest" href="/site.webmanifest">
+    <link rel="mask-icon" href="/safari-pinned-tab.svg" color="#5bbad5">
+    <meta name="msapplication-TileColor" content="#da532c">
+    <meta name="theme-color" content="#ffffff">
+    <link rel="stylesheet" href="/stylesheets/knobots.css">
+
+</head>
+<body class="d-flex flex-column vh-100">
+<div id="app" class="container-fluid">
+   <div class="row">
+    <main role="main" class="col-md-12 ml-sm-auto px-4" id="touchscreen">
+      <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+        <h1 class="h2">ViQi @(<%= robot.title %>) Telepresence</h1>
+      </div>
+      <input type="hidden" id="current_user_id" name= "current_user_id" value="<%= currentUser._id %>" />
+      <input type="hidden" id="connecturl" name="connecturl" value="<%= robot.connecturl %>" />
+      <input type="hidden" id="robot_id" name="robot_id" value="<%= robot.id %>" />
+      <div class="row">
+        <div class="col">
+          <div class="form-group">
+            <label class="form-label" for="selected_telepresence_who">Who:</label>
+            <input type="text" v-model="selected_telepresence_who" name="selected_telepresence_who" id="selected_telepresence_who" required/>
+          </div>
+        </div>
+        <div class="col">
+          <div class="form-group">
+            <label class="form-label" for="selected_telepresence_email">Email:</label>
+            <input type="text" v-model="selected_telepresence_email" name="selected_telepresence_email" id="selected_telepresence_email" required/>
+          </div>
+        </div>
+        <div class="col">
+        </div>
+      </div>
+      <div class="row">
+        <div class="col">
+         <div class="form-group">
+           <label class="form-label" for="selected_telepresence_where">Where:</label>
+           <input type="text" v-model="selected_telepresence_where" name="selected_telepresence_where" id="selected_telepresence_where" required/>
+         </div>
+         <div>
+          <select class="form-select"  name="telepresence_destinations" @change="setDestinations($event,$event.target.selectedIndex)">
+           <option v-for="destination in telepresence_destinations" value="{{destination}}">{{destination}}</option>
+          </select>
+         </div>
+        </div>
+        <div class="col">
+          <div class="form-group">
+            <label class="form-label" for="selected_telepresence_whom">Whom:</label>
+            <input type="text" v-model="selected_telepresence_whom" name="selected_telepresence_whom" id="selected_telepresence_whom" required/>
+          </div>
+          <div>
+           <select class="form-select"  name="telepresence_guests" @change="setTelepresenceGuests($event,$event.target.selectedIndex)">
+            <option v-for="guest in telepresence_guests" value="{{guest}}">{{guest}}</option>
+           </select>
+          </div>
+        </div>
+        <div class="col">
+        </div>
+       </div>
+      <div class="row">
+        <div class="col">
+          <div class="form-group">
+            <label class="form-label" for="selected_telepresence_when">When:</label>
+            <vuejs-datepicker v-model="selected_telepresence_when" name="selected_telepresence_when"></vuejs-datepicker>
+          </div>
+        </div>
+        <div class="col">
+          <div class="form-group">
+            <label class="form-label" for="slots">Slot:</label>
+            <select class="form-select" name="slots" @change="setTelepresenceSlotIndex($event,$event.target.selectedIndex)">
+              <option v-for="slot in telepresence_slots" value="{{slot}}">{{slot}}</option>
+            </select>
+          </div>
+        </div>
+        <div class="col">
+          <div class="form-group">
+            <label class="form-label" for="durations">Duration:</label>
+           <select class="form-select" name="durations" @change="setTelepresenceDurationIndex($event,$event.target.selectedIndex)">
+            <option v-for="duration in telepresence_durations" value="{{duration}}">{{duration}}</option>
+           </select>
+         </div>
+       </div>
+       <div class="col">
+       </div>
+     </div>
+     <div class="row">
+      <div class="col">
+       <div class="form-group">
+         <label class="form-label" for="selected_telepresence_zoom">Zoom:</label>
+         <input type="text" v-model="selected_telepresence_zoom" name="selected_telepresence_zoom" id="selected_telepresence_zoom" required/>
+       </div>
+     </div>
+     <div class="col">
+      <div class="form-group">
+        <label class="form-label" for="selected_telepresence_start">Start:</label>
+        <input type="text" size="40" v-model="selected_telepresence_start" name="selected_telepresence_start" id="selected_telepresence_start" required/>
+      </div>
+    </div>
+    <div class="col">
+     <div class="form-group">
+       <label class="form-label" for="selected_telepresence_join">Join:</label>
+       <input type="text" size="40" v-model="selected_telepresence_join" name="selected_telepresence_join" id="selected_telepresence_join" required/>
+     </div>
+    </div>
+    <div class="col">
+    </div>
+   </div>
+   <div class="row">
+     <div class="col">
+        <button class="btn btn-danger btn-lg" @click="createTelepresence" title="Create a zoom call for the current telepresence">Create</button>
+        <button class="btn btn-danger btn-lg" @click="addTelepresence" title="Save the current telepresence">Add</button>
+        <button class="btn btn-danger btn-lg" @click="delTelepresence" title="Delete the current telepresence">Delete</button>
+        <button class="btn btn-danger btn-lg" @click="launchTelepresence" title="Launch the current telepresence"><span data-feather="airplay"></span></button>
+        <button class="btn btn-danger btn-lg" @click="listTelepresences" title="Load telepresences and destinations"><span data-feather="list"></span></button>
+        <button class="btn btn-danger btn-lg" @click="setTelepresenceDestinations" title="Save destinations"><span data-feather="map-pin"></span></button>
+    </div>
+    <div class="col">
+        <a class="nav-link" href="/knobots/<%=robot._id%>/telepresences">
+          <span data-feather="link"></span>
+          Telepresences
+        </a>
+    </div>
+    <div class="col">
+        <a class="nav-link" href="/knobots/<%=robot._id%>/destinations">
+          <span data-feather="map-pin"></span>
+          Destinations
+        </a>
+    </div>
+  </div>
+  </div>
+      <hr>
+      <table class="table">
+        <thead>
+          <tr>
+            <th scope="col">Who</th>
+            <th scope="col">Email</th>
+            <th scope="col">Whom</th>
+            <th scope="col">Where</th>
+            <th scope="col">When</th>
+            <th scope="col">Duration</th>
+            <th scope="col">Zoom</th>
+            <th scope="col">Start</th>
+            <th scope="col">Join</th>
+          </tr>
+        </thead>
+        <tbody>
+        <tbody v-for="telepresence in robot.telepresences" :key="telepresence._id" v-on:click="selectTelepresence(telepresence)">
+          <tr class="clickable-row">
+            <td>{{telepresence.who}}</td>
+            <td>{{telepresence.email}}</td>
+            <td>{{telepresence.whom}}</td>
+            <td>{{telepresence.where}}</td>
+            <td>{{telepresence.when}}</td>
+            <td>{{telepresence.duration}}</td>
+            <td>{{telepresence.zoom}}</td>
+            <td>{{telepresence.start}}</td>
+            <td>{{telepresence.join}}</td>
+          </tr>
+        </tbody>
+      </table>
+
+   </main>
+ </div>
+</div>
+
+<script type="text/javascript" src="/javascripts/eventemitter2.js"></script>
+<script type="text/javascript" src="/javascripts/roslib.js"></script>
+<script type="text/javascript" src="/javascripts/three.min.js"></script>
+<script type="text/javascript" src="/javascripts/axios.min.js"></script>
+<script type="text/javascript" src="/javascripts/vue.min.js"></script>
+<script type="text/javascript" src="/javascripts/vuejs-datepicker.js"></script>
+<!-- Main -->
+<script type="text/javascript" src="/javascripts/main.js"></script>
+<!-- Icons -->
+<script type="text/javascript" src="/javascripts/feather.min.js"></script>
+<script>
+  feather.replace();
+</script>
+</body>
+</html>

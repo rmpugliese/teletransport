@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Teletransport.me</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/5.0.0-alpha1/css/bootstrap.min.css"
+        integrity="sha384-r4NyP46KrjDleawBgD5tp8Y7UzmLA05oM1iAEQ17CSuDqnUK2+k9luXQOfXJCJ4I" crossorigin="anonymous">
+    <script src="https://cdn.jsdelivr.net/npm/bs-custom-file-input/dist/bs-custom-file-input.js"></script>
+
+    <script src='https://api.mapbox.com/mapbox-gl-js/v1.12.0/mapbox-gl.js'></script>
+    <link href='https://api.mapbox.com/mapbox-gl-js/v1.12.0/mapbox-gl.css' rel='stylesheet' />
+    <link rel="stylesheet" href="/stylesheets/app.css">
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+    <link rel="manifest" href="/site.webmanifest">
+    <link rel="mask-icon" href="/safari-pinned-tab.svg" color="#5bbad5">
+    <meta name="msapplication-TileColor" content="#da532c">
+    <meta name="theme-color" content="#ffffff">
+    <link rel="stylesheet" href="/stylesheets/knobots.css">
+
+</head>
+<body class="d-flex flex-column vh-100">
+<div id="app" class="container-fluid">
+   <div class="row">
+        <main role="main" class="col-md-12 ml-sm-auto px-4" id="touchscreen">
+          <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+            <h1 class="h2">
+              <a class="nav-link" href="/knobots/<%=robot._id%>/screen">
+                <span data-feather="airplay"></span>
+                Screen
+              </a>
+              <a class="nav-link" href="/knobots/<%=robot._id%>/config">
+                <span data-feather="radio"></span>
+                Config
+              </a>
+              <a class="nav-link" href="/knobots/<%=robot._id%>/apps">
+                <span data-feather="grid"></span>
+                Apps
+              </a>
+            </h1>
+            <b>
+              <p class="text-danger" v-if="!connected">Not connected!</p>
+    				  <p class="text-success" v-if="connected">Connected!</p>
+              <p class="text-success">{{ rosbridge_address }}</p>
+            </b>
+            <input type="hidden" id="robot_id" name="robot_id" value="<%= robot.id %>" />
+            <input type="hidden" id="connecturl" name="connecturl" value="<%= robot.connecturl %>" />
+            <button :disabled="loading" class="btn btn-danger" @click="disconnect" v-if="connected">Disconnect!</button>
+    				<button :disabled="loading" class="btn btn-success" @click="connect" v-else>Connect!</button>
+          </div>
+          <div class="row">
+            <div class="col-md-4">
+                <div class="card">
+                  <h2><center>Commands</center></h2>
+                  <hr>
+                  <button @click="workflowAction('JobotDefaultIdleWorkflow')" :disabled="loading || !connected" class="btn btn-warning">Idle</button>
+                  <!-- <button @click="workflowAction('JobotDefaultMappingWorkflow')" :disabled="loading || !connected" class="btn btn-danger">Build Map</button> -->
+                  <button @click="workflowAction('JobotDefaultNavigationWorkflow')" :disabled="loading || !connected" class="btn btn-info">Navigate</button>
+                  <br>
+                  <button @click="autoDock('dock')" :disabled="loading || !connected" class="btn btn-warning">Dock</button>
+                  <button @click="autoDock('undock')" :disabled="loading || !connected" class="btn btn-info">UnDock</button>
+                  <button @click="autoDock('cancel')" :disabled="loading || !connected" class="btn btn-danger">Cancel Dock</button>
+                </div>
+            </div>
+            <div class="col-md-4">
+             <div class="card">
+               <div class="card-body text-center" id="status">
+                 <p>{{ current_workflow_name }} / {{ current_battery_voltage.toFixed(2) }} / {{ current_battery_capacity }}</p>
+                 <hr>
+                 <p>Some actions for the robot</p>
+                 <!-- <div id="dragstartzone" @mousedown="startDrag" @mousemove="doDrag"> -->
+                 <div id="dragstartzone" @touchstart="startDrag" @touchmove="doDrag" @mousedown="startDrag" @mousemove="doDrag">
+                 </div>
+                 <div id="dragCircle" :style="dragCircleStyle"></div>
+               </div>
+             </div>
+           </div>
+          <!--   <div class="col-md-4">
+                <div class="card">
+                  <div class="card-body text-center" id="status">
+                    <p>{{ current_workflow_name }} / {{ current_battery_voltage.toFixed(2) }} / {{ current_battery_capacity }}</p>
+                    <hr>
+                    <div class="row">
+                      <div class="col">
+                        <button @click="sendJoystick(180,40)" :disabled="loading || !connected" class="btn btn-primary btn-lg"><span data-feather="arrow-up-left"></span></button>
+                      </div>
+                      <div class="col">
+                        <button @click="sendJoystick(100,0)" :disabled="loading || !connected" class="btn btn-primary btn-lg"><span data-feather="arrow-up"></span></button>
+                      </div>
+                      <div class="col">
+                        <button @click="sendJoystick(20,40)" :disabled="loading || !connected" class="btn btn-primary btn-lg"><span data-feather="arrow-up-right"></span></button>
+                      </div>
+                    </div>
+                    <br>
+                    <div class="row">
+                      <div class="col">
+                        <button @click="sendJoystick(180,100)" :disabled="loading || !connected" class="btn btn-primary btn-lg"><span data-feather="arrow-left"></span></button>
+                      </div>
+                      <div class="col">
+                        <button @click="sendJoystick(100,100)" :disabled="loading || !connected" class="btn btn-primary btn-lg"><span data-feather="life-buoy"></span></button>
+                      </div>
+                      <div class="col">
+                        <button @click="sendJoystick(0,100)" :disabled="loading || !connected" class="btn btn-primary btn-lg"><span data-feather="arrow-right"></span></button>
+                      </div>
+                    </div>
+                    <br>
+                    <div class="row">
+                      <div class="col">
+                        <button @click="sendJoystick(20,160)" :disabled="loading || !connected" class="btn btn-primary btn-lg"><span data-feather="arrow-down-left"></span></button>
+                      </div>
+                      <div class="col">
+                        <button @click="sendJoystick(100,180)" :disabled="loading || !connected" class="btn btn-primary btn-lg"><span data-feather="arrow-down"></span></button>
+                      </div>
+                      <div class="col">
+                        <button @click="sendJoystick(180,160)" :disabled="loading || !connected" class="btn btn-primary btn-lg"><span data-feather="arrow-down-right"></span></button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+            </div> -->
+            <div class="col-md-4">
+                <div class="card">
+                  <h2><center>Locations</center></h2>
+                  <hr>
+                  <div class="col-md-12 text-center" id="pose">
+                      <div>
+                         <label>X</label>
+                         <input type="number" v-model.number="pose.position.x.toFixed(2)" disabled />
+                         <label>Y</label>
+                         <input type="number" v-model.number="pose.position.y.toFixed(2)" disabled />
+                         <br>
+                         <label>Z</label>
+                         <input type="number" v-model.number="pose.rotation.z.toFixed(2)" disabled />
+                      </div>
+                  </div>
+                  <div class="w-100"><br></div>
+                  <div>
+                   <select class="form-select"  name="Points" @change="setPoint($event,$event.target.selectedIndex)">
+                    <option v-for="goal in current_map.goals" value="{{goal.name}}"> Name: {{goal.name}} ({{goal.x}},{{goal.y}},{{goal.z}}) [{{goal.type}}] </option>
+                   </select>
+                  </div>
+                  <div class="w-100"><br></div>
+                  <div class="botton-grid text-center">
+                   <button :disabled="!connected || action.status.status == 1" @click="setGoal" class="btn btn-danger btn-lg">Set</button>
+                   <button :disabled="!connected || action.status.status == 1" @click="sendGoal" class="btn btn-danger btn-lg">Start</button>
+                   <button :disabled="!connected || ![1].includes(action.status.status)" @click="cancelGoal" class="btn btn-danger btn-lg">Cancel</button>
+                 </div>
+                 <div class="w-100"><br></div>
+                </div>
+            </div>
+          </div>
+          <div class="w-100"><hr></div>
+          <div class="row">
+               <div class="w-100 text-center">
+                <button :disabled="!current_hardware.st_Ros_BumpFront" class="btn btn-info btn-lg">Bumper Front</button>
+                <button :disabled="!current_hardware.st_Ros_BumpRear" class="btn btn-info btn-lg">Bumper Rear</button>
+                <button :disabled="!current_hardware.st_Ros_Recharge_On" class="btn btn-info btn-lg">Recharge On</button>
+                <button :disabled="!current_hardware.st_Ros_Recharge_Ok" class="btn btn-info btn-lg">Recharge Ok</button>
+                <button :disabled="!current_hardware.st_Ros_Emergenza" class="btn btn-info btn-lg">Emergency</button>
+               </div>
+          </div>
+     </div>
+   </main>
+ </div>
+</div>
+
+<script type="text/javascript" src="/javascripts/eventemitter2.js"></script>
+<script type="text/javascript" src="/javascripts/roslib.js"></script>
+<script type="text/javascript" src="/javascripts/three.min.js"></script>
+<script type="text/javascript" src="/javascripts/axios.min.js"></script>
+<script type="text/javascript" src="/javascripts/vue.min.js"></script>
+<script type="text/javascript" src="/javascripts/vuejs-datepicker.js"></script>
+<!-- Main -->
+<script type="text/javascript" src="/javascripts/main.js"></script>
+<!-- Icons -->
+<script type="text/javascript" src="/javascripts/feather.min.js"></script>
+<script>
+  feather.replace()
+</script>
+</body>
+</html>

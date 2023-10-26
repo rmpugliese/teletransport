@@ -1,0 +1,4 @@
+#!/bin/bash
+
+text="$@"
+curl -qG --output - --data-urlencode "text=${text}" 'http://localhost:5002/api/tts' 2> /dev/null | /usr/bin/aplay

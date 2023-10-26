@@ -1,0 +1,111 @@
+<% layout('layouts/boilerplate')%>
+<div class="row">
+    <h1 class="text-center">Edit Robot</h1>
+    <div class="col-md-6 offset-md-3">
+        <form action="/robots/<%=robot._id%>?_method=PUT" method="POST" novalidate class="validated-form"
+            enctype="multipart/form-data">
+            <div class="mb-3">
+                <label class="form-label" for="title">Name</label>
+                <input class="form-control" type="text" id="title" name="robot[title]"
+                    value="<%=robot.title %>" required>
+                <div class="valid-feedback">
+                    Looks good!
+                </div>
+            </div>
+            <div class="mb-3">
+                <label class="form-label" for="location">Location</label>
+                <input class="form-control" type="text" id="location" name="robot[location]"
+                    value="<%=robot.location %>" required>
+                <div class="valid-feedback">
+                    Looks good!
+                </div>
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label" for="price">Teletransport Session Price</label>
+                <div class="input-group">
+                    <span class="input-group-text" id="price-label">$</span>
+                    <input type="text" class="form-control" id="price" placeholder="0.00" aria-label="price"
+                        aria-describedby="price-label" name="robot[price]" value="<%=robot.price %>"
+                        required><div class="valid-feedback">
+                        Looks good!
+                    </div>
+                </div>
+            </div>
+            <div class="mb-3">
+                <label class="form-label" for="connecturl">Connection URL</label>
+                <input class="form-control" type="text" id="connecturl" name="robot[connecturl]"
+                    value="<%=robot.connecturl %>" required>
+                <div class="valid-feedback">
+                    Looks good!
+                </div>
+            </div>
+            <div class="mb-3">
+                <label class="form-label" for="connectremoteurl">Remote Connection URL</label>
+                <input class="form-control" type="text" id="connectremoteurl" name="robot[connectremoteurl]"
+                    value="<%=robot.connectremoteurl %>" required>
+                <div class="valid-feedback">
+                    Looks good!
+                </div>
+            </div>
+            <div class="mb-3">
+                <label for="model" class="form-label">Model</label>
+                  <select id="model" name="robot[model]" required="required" class="custom-select">
+                    <option value="jobot" <%= robot.model == 'jobot' ? 'selected' : ''%>>Jobot</option>
+                    <option value="viqi" <%= robot.model == 'viqi' ? 'selected' : ''%>>ViQi</option>
+                    <option value="unknown" <%= robot.model == 'unknown' ? 'selected' : ''%>>Unknown</option>
+                  </select>
+                <div class="valid-feedback">
+                    Looks good!
+                </div>
+              </div>
+              <div class="mb-3">
+                  <label for="serial" class="form-label">Serial</label>
+                  <input class="form-control" type="text" id="serial" name="robot[serial]"
+                      value="<%=robot.serial %>" required>
+                  <div class="valid-feedback">
+                      Looks good!
+                  </div>
+              </div>
+            <div class="mb-3">
+                <label class="form-label" for="description">Description</label>
+                <textarea class="form-control" type="text" id="description" name="robot[description]"
+                    required><%= robot.description%></textarea>
+                <div class="valid-feedback">
+                    Looks good!
+                </div>
+            </div>
+            <div class="mb-3">
+                <div class="form-file custom-file">
+                    <input type="file" class="form-file-input" id="image" name="image" multiple>
+                    <label class="form-file-label" for="image">
+                        <span class="form-file-text custom-file-label">Add more image(s)...</span>
+                        <span class="form-file-button">Browse</span>
+                    </label>
+                </div>
+            </div>
+            <div class="mb-3">
+                <% robot.images.forEach(function(img, i) {  %>
+                <img src="<%=img.thumbnail %>" class="img-thumbnail" alt="">
+                <div class="form-check-inline">
+                    <input type="checkbox" id="image-<%=i%>" name="deleteImages[]" value="<%=img.filename%>">
+                </div>
+                <label for="image-<%=i%>">Delete?</label>
+                <% })%>
+            </div>
+            <div class="mb-3">
+                <label class="form-label" for="allowedusers">Allowed user name(s):</label>
+                <input class="form-control" type="text" id="allowedusers" name="robot[allowedusers]"
+                    value="<%= robot.allowedusers%>">
+                <small class="text-muted">Comma (',') separated allowed user name(s) ...</small>
+                <div class="valid-feedback">
+                    Looks good!
+                </div>
+            </div>
+            <div class="mb-3">
+                <button class="btn btn-info">Update Robot</button>
+            </div>
+        </form>
+        <a href="/robots/<%= robot._id%>">Back To Robots</a>
+    </div>
+</div>

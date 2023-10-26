@@ -1,0 +1,187 @@
+<% layout('layouts/boilerplate')%>
+
+<div id="app" class="container-fluid">
+   <div class="row">
+        <%- include('./jobotSidebar')%>
+        <main role="main" class="col-md-9 ml-sm-auto col-lg-10 px-4" id="mapeditor">
+          <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+            <h1 class="h2">Maps @(<%= robot.title %>) </h1>
+            <b>
+              <p class="text-danger" v-if="!connected">Not connected!</p>
+    				  <p class="text-success" v-if="connected">Connected!</p>
+              <p class="text-success">{{ rosbridge_address }}</p>
+            </b>
+            <input type="hidden" id="current_user_id" name= "current_user_id" value="<%= currentUser._id %>" />
+            <input type="hidden" id="connecturl" name="connecturl" value="<%= robot.connecturl %>" />
+            <input type="hidden" id="robot_id" name="robot_id" value="<%= robot.id %>" />
+            <button :disabled="loading" class="btn btn-danger" @click="disconnect" v-if="connected">Disconnect!</button>
+    				<button :disabled="loading" class="btn btn-success" @click="connect" v-else>Connect!</button>
+            <button :disabled="loading" class="btn btn-success" @click="remote"><span data-feather="cast"></span></button>
+          </div>
+          <div class="map-container">
+            <div id="map_wrapper" class="image-wrapper map-wrapper">
+             <img id="my_map" src="/images/map.jpg" class="img-fluid" alt="Responsive Map from Jobot" @click="mapClick">
+             <!-- <img id="medibot-marker" src="/images/marker.png" class="icon icon-marker icon-fluid" alt="marker"> -->
+             <canvas id="my_map_canvas" width="0" height="0" @click="mapClick"></canvas>
+            </div>
+          </div>
+          <div class="row">
+            <div class="col-md-9">
+                <select class="form-select" name="Maps" @change="setMapIndex($event,$event.target.selectedIndex)">
+                  <option v-for="mapname in mapnames" v-bind:value="mapname"> {{ mapname }} </option>
+                </select>
+            </div>
+            <div class="col-md-3">
+                <button @click="listMaps" class="btn  btn-lg btn-success">Available Maps</button>
+            </div>
+          </div>
+          <hr>
+          <div class="row">
+            <div class="col-md-12 text-center">
+              <div class="botton-grid mb-3">
+                  <!-- <button :disabled="!connected || action.status.status == 1" @click="setGoal" class="btn btn-danger btn-lg">Set</button> -->
+                  <button @click="readMap" class="btn btn-danger btn-lg">Read</button>
+                  <button @click="saveMap" class="btn btn-danger btn-lg">Save</button>
+                  <button @click="loadMap" class="btn btn-danger btn-lg">Load</button>
+                  <button @click="uploadMap" class="btn btn-danger btn-lg">Upload</button>
+                  <button @click="downloadMap" class="btn btn-danger btn-lg">Download</button>
+                  <label class="form-label" for="map_name">Name: </label>
+                  <input type="text" size="16" v-model="map_name" name="map_name" id="map_name"/>
+              </div>
+              <hr>
+              <div class="row" id="pose">
+                  <div class="col-md-4">
+                   <label>Pose: X</label>
+                   <input type="number" v-model.number="pose.position.x.toFixed(3)" disabled />
+                  </div>
+                  <div class="col-md-4">
+                   <label>Y</label>
+                   <input type="number" v-model.number="pose.position.y.toFixed(3)" disabled />
+                  </div>
+                  <div class="col-md-4">
+                   <label>Z</label>
+                   <input type="number" v-model.number="pose.rotation.z.toFixed(3)" disabled />
+                  </div>
+               </div>
+               <br>
+               <div class="row">
+                        <div class="col-md-4">
+                          <label class="form-label" for="name">Location: </label>
+                          <input type="text" v-model="robot_goal.name" name="goal[name]" id="name" required/>
+                        </div>
+                        <div class="col-md-4">
+                            <select class="form-select" name="goal[type]" id="type" @change="setPointType($event)">
+                              <option value="0" v-model="robot_goal.type">0 (Normal)</option>
+                              <option value="1" v-model="robot_goal.type">1 (Dock)</option>
+                              <option value="2" v-model="robot_goal.type">2 (Special)</option>
+                            </select>
+                        </div>
+                        <div class="col-md-4">
+                          <button @click="addGoal" class="btn btn-danger btn-lg" title="Add a Goal"><span data-feather="navigation"></button>
+                          <button class="btn btn-lg btn-danger" @click="delSelectedObiect" title="Delete selected Object"><span data-feather="delete"></button>
+                        </div>
+                </div>
+                <br>
+                <div class="row mb-3">
+                    <div class="col-md-4">
+                        <label class="form-label" for="x">Set: X</label>
+                        <input type="number" name="goal[x]" id="x" v-model.number="robot_goal.x" />
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label" for="y">Y</label>
+                        <input type="number" name="goal[y]" id="y" v-model.number="robot_goal.y" />
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label" for="z">Z</label>
+                        <input type="number" name="goal[z]" id="z" v-model.number="robot_goal.z" />
+                    </div>
+                </div>
+                <br>
+                <div class="row">
+                  <div class="col-md-8">
+                    <select class="form-select" name="Points" @change="setGoalIndex($event,$event.target.selectedIndex)">
+                      <option v-for="goal in current_map.goals" value="{{goal.name}}"> Name: {{goal.name}} ({{goal.x}},{{goal.y}},{{goal.z}}) [{{goal.type}}] </option>
+                    </select>
+                    </div>
+                    <div class="col-md-4">
+                    <!--   <button class="btn btn-lg btn-danger" @click="delGoal" title="Delete selected Goal"><span data-feather="delete"></button> -->
+                      <button class="btn btn-lg btn-danger" @click="newPoly" title="New polygon"><span data-feather="plus"></span></button>
+                      <button class="btn btn-lg btn-danger" @click="cancelPoly" title="Cancel polygon"><span data-feather="slash"></button>
+                      <button class="btn btn-lg btn-danger" @click="addVWall" title="Add a virtual wall"><span data-feather="plus-square"></button>
+                      <button class="btn btn-lg btn-danger" @click="addVPath" title="Add a virtual path"><span data-feather="trending-up"></button>
+                      <button class="btn btn-lg btn-danger" @click="addZWall" title="Add a zone wall"><span data-feather="maximize"></button>
+                    </div>
+                </div>
+                <!--
+                <hr>
+                <div class="row">
+                  <div class="col-md-2">
+                    <label class="form-label" for="name">Walls: </label>
+                  </div>
+                  <div class="col-md-6">
+                    <select class="form-select" name="vwalls" @change="setVWallIndex($event,$event.target.selectedIndex)">
+                      <option v-for="vwall in current_map.vwalls" value="{{vwall.name}}"> {{vwall.polygon.length}} ({{JSON.stringify(vwall.polygon)}}) </option>
+                    </select>
+                  </div>
+                  <div class="col-md-4">
+                      <button class="btn btn-lg btn-danger" @click="newPoly" title="New polygon"><span data-feather="plus"></span></button>
+                      <button class="btn btn-lg btn-danger" @click="addVWall" title="Add a virtual wall"><span data-feather="plus-square"></button>
+                      <button class="btn btn-lg btn-danger" @click="cancelPoly" title="Cancel polygon"><span data-feather="slash"></button>
+                      <button class="btn btn-lg btn-danger" @click="delVWall" title="Delete selected virtual wall"><span data-feather="delete"></button>
+                  </div>
+                </div>
+                <hr>
+                <div class="row">
+                  <div class="col-md-2">
+                    <label class="form-label" for="name">Paths: </label>
+                  </div>
+                  <div class="col-md-6">
+                    <select class="form-select" name="vpaths" @change="setVPathIndex($event,$event.target.selectedIndex)">
+                      <option v-for="vpath in current_map.vpaths" value="{{vpath.name}}"> {{vpath.polygon.length}} ({{JSON.stringify(vpath.polygon)}}) </option>
+                    </select>
+                  </div>
+                  <div class="col-md-4">
+                      <button class="btn btn-lg btn-danger" @click="newPoly" title="New polygon"><span data-feather="plus"></span></button>
+                      <button class="btn btn-lg btn-danger" @click="addVPath" title="Add a virtual path"><span data-feather="trending-up"></button>
+                      <button class="btn btn-lg btn-danger" @click="cancelPoly" title="Cancel polygon"><span data-feather="slash"></button>
+                      <button class="btn btn-lg btn-danger" @click="delVPath" title="Delete selected virtual wall"><span data-feather="delete"></button>
+                  </div>
+                </div>
+                <hr>
+                <div class="row">
+                  <div class="col-md-2">
+                    <label class="form-label" for="name">Zones: </label>
+                  </div>
+                  <div class="col-md-6">
+                    <select class="form-select" name="vpaths" @change="setZWallIndex($event,$event.target.selectedIndex)">
+                      <option v-for="zwall in current_map.zwalls" value="{{zwall.name}}"> {{zwall.polygon.length}} ({{JSON.stringify(zwall.polygon)}}) </option>
+                    </select>
+                  </div>
+                  <div class="col-md-4">
+                      <button class="btn btn-lg btn-danger" @click="newPoly" title="New polygon"><span data-feather="plus"></span></button>
+                      <button class="btn btn-lg btn-danger" @click="addZWall" title="Add a zone wall"><span data-feather="maximize"></button>
+                      <button class="btn btn-lg btn-danger" @click="cancelPoly" title="Cancel polygon"><span data-feather="slash"></button>
+                      <button class="btn btn-lg btn-danger" @click="delZWall" title="Delete selected zone wall"><span data-feather="delete"></button>
+                  </div>
+                </div>
+                -->
+                <br>
+              </div>
+          </div>
+        </main>
+   </div>
+</div>
+
+<script type="text/javascript" src="/javascripts/eventemitter2.js"></script>
+<script type="text/javascript" src="/javascripts/roslib.js"></script>
+<script type="text/javascript" src="/javascripts/three.min.js"></script>
+<script type="text/javascript" src="/javascripts/axios.min.js"></script>
+<script type="text/javascript" src="/javascripts/vue.min.js"></script>
+<script type="text/javascript" src="/javascripts/vuejs-datepicker.js"></script>
+<!-- Main -->
+<script type="text/javascript" src="/javascripts/main.js"></script>
+<!-- Icons -->
+<script type="text/javascript" src="/javascripts/feather.min.js"></script>
+<script>
+  feather.replace()
+</script>

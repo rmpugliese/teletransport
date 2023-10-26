@@ -1,0 +1,121 @@
+<% layout('layouts/boilerplate')%>
+
+<div id="app" class="container-fluid">
+   <div class="row">
+        <%- include('./jobotSidebar')%>
+        <main role="main" class="col-md-9 ml-sm-auto col-lg-10 px-4" id="mapper">
+          <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+            <h1 class="h2">Control @(<%= robot.title %>) </h1>
+            <b>
+              <p class="text-danger" v-if="!connected">Not connected!</p>
+    				  <p class="text-success" v-if="connected">Connected!</p>
+              <p class="text-success">{{ rosbridge_address }}</p>
+            </b>
+            <input type="hidden" id="current_user_id" name= "current_user_id" value="<%= currentUser._id %>" />
+            <input type="hidden" id="connecturl" name="connecturl" value="<%= robot.connecturl %>" />
+            <input type="hidden" id="robot_id" name="robot_id" value="<%= robot.id %>" />
+            <button :disabled="loading" class="btn btn-danger" @click="disconnect" v-if="connected">Disconnect!</button>
+    				<button :disabled="loading" class="btn btn-success" @click="connect" v-else>Connect!</button>
+            <button :disabled="loading" class="btn btn-success" @click="remote"><span data-feather="cast"></span></button>
+          </div>
+          <div class="row align-items-center mt-4">
+            <div class="col-md-6">
+         		 <img id="my_image" src="<%=robot.images[0].url%>" class="figure-img img-fluid" width="600" alt="Responsive video stream from Jobot">
+         	   <figcaption class="figure-caption">Compressed image stream from Jobot.</figcaption>
+            </div>
+            <div class="col-md-6">
+              <div class="map-container">
+                <div id="map_wrapper" class="image-wrapper map-wrapper">
+                  <!-- <img id="my_map" src="/maps/map.jpg" class="img-fluid" alt="Responsive Map from Jobot" @click="updateMap"> -->
+                  <img id="my_map" src="/images/map.jpg" class="img-fluid" alt="Responsive Map from Jobot">
+                  <!-- <img id="medibot-marker" src="/images/marker.png" class="icon icon-marker icon-fluid" alt="marker"> -->
+                  <canvas id="my_map_canvas" width="0" height="0"></canvas>
+                  <figcaption class="figure-caption">Compressed map stream from Jobot.</figcaption>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="row">
+          <div class="col-md-6">
+           <div class="card">
+             <div class="card-body text-center">
+               <h2 class="text-center">Joystick</h2>
+               <hr>
+               <p>Some actions for the robot</p>
+               <!-- <div id="dragstartzone" @mousedown="startDrag" @mousemove="doDrag"> -->
+               <div id="dragstartzone" @touchstart="startDrag" @touchmove="doDrag" @mousedown="startDrag" @mousemove="doDrag">
+               </div>
+               <div id="dragCircle" :style="dragCircleStyle"></div>
+             </div>
+           </div>
+         </div>
+         <div class="col-md-3">
+           <div class="card">
+             <div class="card-body" id="pose">
+               <h2 class="text-center">Position</h2>
+               <hr />
+               <p>Vertical: {{ joystick.vertical.toFixed(3) }}</p>
+               <p>Horizontal: {{ joystick.horizontal.toFixed(3) }}</p>
+               <hr />
+               <p>Pose X: {{ pose.position.x.toFixed(3) }}</p>
+               <p>Pose Y: {{ pose.position.y.toFixed(3) }}</p>
+               <p>Rotation Z: {{ pose.rotation.z.toFixed(3) }}</p>
+             </div>
+           </div>
+         </div>
+         <div class="col-md-3 text-center">
+           <div class="card">
+             <div class="card-body">
+               <button @click="autoDock('undock')" :disabled="loading || !connected" class="btn btn-warning btn-lg">UnDock</button>
+               <button @click="autoDock('dock')" :disabled="loading || !connected" class="btn btn-warning btn-lg">Dock</button>
+               <hr />
+               <button @click="followAction(true)" :disabled="loading || !connected" class="btn btn-danger btn-lg">Follow On</button>
+               <button @click="followAction(false)" :disabled="loading || !connected" class="btn btn-warning btn-lg">Off</button>
+               <hr />
+               <button @click="startMapper" :disabled="loading || !connected" class="btn btn-danger btn-lg">Mapping</button>
+               <button @click="stopMapper" :disabled="loading || !connected" class="btn btn-warning btn-lg">Idle</button>
+               <hr />
+               <button @click="saveMapper" :disabled="loading || !connected" class="btn btn-danger btn-lg">Save</button>
+               <button @click="cancelMapper" :disabled="loading || !connected" class="btn btn-success btn-lg">Cancel</button>
+             </div>
+            </div>
+         </div>
+        </div>
+        <hr />
+        <div class="row" id="status">
+          <div class="w-100 text-center">
+                <button :disabled="!current_hardware.st_Ros_BumpFront" class="btn btn-info btn-lg">Bumper Front</button>
+                <button :disabled="!current_hardware.st_Ros_BumpRear" class="btn btn-info btn-lg">Bumper Rear</button>
+                <button :disabled="!current_hardware.st_Ros_Recharge_On" class="btn btn-info btn-lg">Recharge On</button>
+                <button :disabled="!current_hardware.st_Ros_Recharge_Ok" class="btn btn-info btn-lg">Recharge Ok</button>
+                <button :disabled="!current_hardware.st_Ros_Emergenza" class="btn btn-info btn-lg">Emergency</button>
+                <hr>
+                <label>Current Workflow</label>
+                <input type="text" size="30" v-model="current_workflow_name" disabled />
+                <label>Docking Status</label>
+                <input type="text" size="40" v-model="current_docking" disabled />
+                <hr>
+                <label>Battery</label>
+                <input type="number" v-model.number="current_battery_voltage.toFixed(2)" disabled />
+                <label>Battery Capacity</label>
+                <input type="number" v-model.number="current_battery_capacity" disabled />
+          </div>
+          <hr />
+        </div>
+      </main>
+   </div>
+</div>
+
+<script type="text/javascript" src="/javascripts/eventemitter2.js"></script>
+<script type="text/javascript" src="/javascripts/roslib.js"></script>
+<script type="text/javascript" src="/javascripts/three.min.js"></script>
+<script type="text/javascript" src="/javascripts/axios.min.js"></script>
+<script type="text/javascript" src="/javascripts/vue.min.js"></script>
+<script type="text/javascript" src="/javascripts/vuejs-datepicker.js"></script>
+<!-- Main -->
+<script type="text/javascript" src="/javascripts/main.js"></script>
+<!-- Icons -->
+<script type="text/javascript" src="/javascripts/feather.min.js"></script>
+<script>
+  feather.replace()
+</script>

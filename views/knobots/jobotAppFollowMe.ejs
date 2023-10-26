@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Teletransport.me</title>
+    <link rel="stylesheet" href="/stylesheets/bootstrap.min.css">
+    <script src="/javascripts/dist/bs-custom-file-input.js"></script>
+    <script src='/stylesheets/mapbox-gl.js'></script>
+    <link href='/stylesheets/mapbox-gl.css' rel='stylesheet' />
+    <link rel="stylesheet" href="/stylesheets/app.css">
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+    <link rel="manifest" href="/site.webmanifest">
+    <link rel="mask-icon" href="/safari-pinned-tab.svg" color="#5bbad5">
+    <meta name="msapplication-TileColor" content="#da532c">
+    <meta name="theme-color" content="#ffffff">
+    <link rel="stylesheet" href="/stylesheets/simple-keyboard.css">
+    <link rel="stylesheet" href="/stylesheets/knobots.css">
+
+</head>
+<body class="d-flex flex-column vh-100">
+<div id="app" class="container-fluid">
+   <div class="row">
+        <main role="main" class="col-md-12 ml-sm-auto px-4">
+          <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+            <h1 class="h2">
+              <a class="nav-link" href="/knobots/<%=robot._id%>/touch">
+                <span data-feather="airplay"></span>
+                Touch
+              </a>
+              <a class="nav-link" href="/knobots/<%=robot._id%>/config">
+                <span data-feather="radio"></span>
+                Config
+              </a>
+              <a class="nav-link" href="/knobots/<%=robot._id%>/apps">
+                <span data-feather="grid"></span>
+                Apps
+              </a>
+            </h1>
+            <b>
+              <p class="text-danger" v-if="!connected">Not connected!</p>
+    				  <p class="text-success" v-if="connected">Connected!</p>
+              <p class="text-success">{{ rosbridge_address }}</p>
+            </b>
+            <!-- <input type="hidden" id="current_user_id" name= "current_user_id" value="<%= currentUser._id %>" /> -->
+            <input type="hidden" id="robot_id" name="robot_id" value="<%= robot.id %>" />
+            <input type="hidden" id="connecturl" name="connecturl" value="<%= robot.connecturl %>" />
+            <button :disabled="loading" class="btn btn-danger" @click="disconnect" v-if="connected">Disconnect!</button>
+    				<button :disabled="loading" class="btn btn-success" @click="connect" v-else>Connect!</button>
+          </div>
+          <div class="row">
+            <h1>Follow Me</h1>
+            <p>When you push the start button usign its senses the robot follows you.
+            It actually follows the closest human body.
+            If you are out of reach or if you push the stop button the robot stops following you.
+            </p>
+         <div class="w-100"><br></div>
+         <div class="row">
+          <div class="col-md-6 text-center">
+           <button @click="followme_action" class="btn btn-danger btn-lg">Please Follow Me</button>
+          </div>
+          <div class="col-md-6 text-center">
+           <button @click="followAction(false)" class="btn btn-danger btn-lg">Stop Following Me!</button>
+          </div>
+        </div>
+   </main>
+ </div>
+</div>
+
+<script type="text/javascript" src="/javascripts/eventemitter2.js"></script>
+<script type="text/javascript" src="/javascripts/roslib.js"></script>
+<script type="text/javascript" src="/javascripts/three.min.js"></script>
+<script type="text/javascript" src="/javascripts/axios.min.js"></script>
+<script type="text/javascript" src="/javascripts/vue.min.js"></script>
+<script type="text/javascript" src="/javascripts/vuejs-datepicker.js"></script>
+<!-- Main -->
+<script type="text/javascript" src="/javascripts/main.js"></script>
+<!-- Icons -->
+<script type="text/javascript" src="/javascripts/feather.min.js"></script>
+<script>
+  feather.replace()
+</script>
+</body>
+</html>

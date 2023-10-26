@@ -1,0 +1,2 @@
+#!/bin/bash
+lshw -short 2>/dev/null|egrep -i 'network'| egrep -i 'wireless'|awk '{print $2}'

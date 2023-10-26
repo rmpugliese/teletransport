@@ -1,0 +1,71 @@
+<% layout('layouts/boilerplate')%>
+
+<div id="app" class="container-fluid">
+   <div class="row">
+        <%- include('./jobotSidebar')%>
+        <main role="main" class="col-md-9 ml-sm-auto col-lg-10 px-4">
+          <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+            <h1 class="h2">Edit Missions @(<%= robot.title %>) </h1>
+            <b>
+              <p class="text-danger" v-if="!connected">Not connected!</p>
+    				  <p class="text-success" v-if="connected">Connected!</p>
+              <p class="text-success">{{ rosbridge_address }}</p>
+            </b>
+            <input type="hidden" id="current_user_id" name= "current_user_id" value="<%= currentUser._id %>" />
+            <input type="hidden" id="connecturl" name="connecturl" value="<%= robot.connecturl %>" />
+            <input type="hidden" id="robot_id" name="robot_id" value="<%= robot.id %>" />
+            <button :disabled="loading" class="btn btn-danger" @click="disconnect" v-if="connected">Disconnect!</button>
+    				<button :disabled="loading" class="btn btn-success" @click="connect" v-else>Connect!</button>
+            <button :disabled="loading" class="btn btn-success" @click="remote"><span data-feather="cast"></span></button>
+          </div>
+          <div class="row">
+            <div class="col-md-12 text-center">
+              <div class="form-group">
+                  <div class="row">
+                      <div class="col">
+                          <label class="form-label" for="mission[name]">Mission Name: </label>
+                          <input type="text" v-model="mission.name" name="mission[name]" id="mission[name]" required/>
+                      </div>
+                      <div class="col">
+                          <button @click="checkMission" class="btn btn-danger btn-lg">Check Mission</button>
+                          <button @click="addMission" class="btn btn-danger btn-lg">Add Mission</button>
+                          <button @click="saveMission" class="btn btn-danger btn-lg">Save Mission</button>
+                      </div>
+                  </div>
+                </div>
+                <div class="form-group">
+                  <label for="mission[tasks]">Mission Tasks</label>
+                  <textarea class="form-control" v-model="mission.tasks" id="mission[tasks]" name="mission[tasks]" rows="10"></textarea>
+                </div>
+            </div>
+            <!-- </form> -->
+            <hr>
+            <div class="row">
+              <div class="col">
+                <select class="form-select" name="Points" @change="setMissionIndex($event,$event.target.selectedIndex)">
+                  <option v-for="mission in robot.missions" value="{{mission.name}}"> Name: {{mission.name}} ({{mission.tasks}} </option>
+                </select>
+                </div>
+                <div class="col">
+                  <button class="btn btn-lg btn-danger" @click="setMission">Edit Mission</button>
+                  <button class="btn btn-lg btn-danger" @click="delMission">Delete Mission</button>
+                </div>
+            </div>
+          </div>
+        </main>
+   </div>
+</div>
+
+<script type="text/javascript" src="/javascripts/eventemitter2.js"></script>
+<script type="text/javascript" src="/javascripts/roslib.js"></script>
+<script type="text/javascript" src="/javascripts/three.min.js"></script>
+<script type="text/javascript" src="/javascripts/axios.min.js"></script>
+<script type="text/javascript" src="/javascripts/vue.min.js"></script>
+<script type="text/javascript" src="/javascripts/vuejs-datepicker.js"></script>
+<!-- Main -->
+<script type="text/javascript" src="/javascripts/main.js"></script>
+<!-- Icons -->
+<script type="text/javascript" src="/javascripts/feather.min.js"></script>
+<script>
+  feather.replace()
+</script>
